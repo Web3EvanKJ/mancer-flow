@@ -1,48 +1,49 @@
 "use client";
 
-import { EmployeeStat } from "@/components/fragment/EmployeeStat";
-import { EmployeeStatusBadge } from "@/components/fragment/EmployeeStatusBadge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Zap,
-  Wallet,
-  Clock,
-  ArrowDownToLine,
-  User,
-  TrendingUp,
-} from "lucide-react";
+import { CenterState } from "@/components/fragment/CenterState";
+import { EmployeeStreamCard } from "@/components/fragment/EmployeeStreamCard";
+import { useListRecipientStreams } from "@/hooks/useListRecipientStreams";
+import { Wallet, TrendingUp, Loader2, AlertTriangle } from "lucide-react";
+import { useAccount } from "wagmi";
 
 export default function MePage() {
-  // ---------------- MOCK DATA ----------------
-  const streams = [
-    {
-      id: 12,
-      sender: "0xE91a...4F22",
-      token: "PHII",
-      ratePerSecond: "0.00042",
-      withdrawable: "185 PHII",
-      lastPaid: "2 hours ago",
-      status: "Active",
-    },
-    {
-      id: 19,
-      sender: "0xA33b...9C10",
-      token: "PHII",
-      ratePerSecond: "0.00018",
-      withdrawable: "0 PHII",
-      lastPaid: "Paused",
-      status: "Paused",
-    },
-    {
-      id: 27,
-      sender: "0x91F2...7A0E",
-      token: "PHII",
-      ratePerSecond: "0.00055",
-      withdrawable: "1,220 PHII",
-      lastPaid: "1 day ago",
-      status: "Voided",
-    },
-  ];
+  const { address, isConnecting } = useAccount();
+
+  const { data, loading, error } = useListRecipientStreams(
+    address as `0x${string}`,
+  );
+
+  const streams = data?.streams?.items ?? [];
+
+  if (!address && !isConnecting) {
+    return (
+      <CenterState
+        icon={<Wallet className="w-10 h-10 text-[#F9140D]" />}
+        title="Connect your wallet"
+        description="Your salary streams will appear here once connected."
+      />
+    );
+  }
+
+  if (loading || isConnecting) {
+    return (
+      <CenterState
+        icon={<Loader2 className="w-10 h-10 text-[#F9140D] animate-spin" />}
+        title="Loading your streams..."
+        description="Fetching on-chain salary data"
+      />
+    );
+  }
+
+  if (error) {
+    return (
+      <CenterState
+        icon={<AlertTriangle className="w-10 h-10 text-red-500" />}
+        title="Failed to load streams"
+        description="Something went wrong while fetching blockchain data."
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-red-50/20 to-white">
@@ -61,69 +62,7 @@ export default function MePage() {
         {/* Stream list */}
         <div className="space-y-3">
           {streams.map((stream) => (
-            <Card
-              key={stream.id}
-              className="group bg-white border-2 border-gray-100 hover:border-[#F9140D]/30 rounded-3xl shadow-lg hover:shadow-2xl hover:shadow-red-500/10 transition-all duration-300"
-            >
-              <CardContent className="px-8 py-3">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
-                  {/* Left */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F9140D] to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30">
-                        <span className="text-white font-bold text-lg">
-                          #{stream.id}
-                        </span>
-                      </div>
-                      <EmployeeStatusBadge status={stream.status} />
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 font-mono">
-                      <User className="w-4 h-4 text-[#F9140D]" />
-                      <span className="text-sm">From</span>
-                      <span className="font-semibold">{stream.sender}</span>
-                    </div>
-                  </div>
-
-                  {/* Middle */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    <EmployeeStat
-                      label="Rate/sec"
-                      value={`${stream.ratePerSecond} ${stream.token}`}
-                      icon={<Zap className="w-4 h-4" />}
-                    />
-                    <EmployeeStat
-                      label="Withdrawable"
-                      value={stream.withdrawable}
-                      highlight
-                      icon={<Wallet className="w-4 h-4" />}
-                    />
-                    <EmployeeStat
-                      label="Last Paid"
-                      value={stream.lastPaid}
-                      icon={<Clock className="w-4 h-4" />}
-                    />
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3 flex-shrink-0">
-                    <button
-                      onClick={() => alert("Mock: Withdraw custom")}
-                      className="flex items-center h-12 px-6 rounded-xl border-2 border-[#F9140D] bg-white hover:bg-red-50 text-[#F9140D] font-semibold transition-all duration-300 shadow-sm hover:shadow-lg "
-                    >
-                      <ArrowDownToLine className="w-4 h-4 mr-2" />
-                      Withdraw
-                    </button>
-                    <button
-                      className="flex items-center h-12 px-6 rounded-xl bg-gradient-to-r from-[#F9140D] to-red-600 hover:from-red-600 hover:to-[#F9140D] text-white font-bold shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50 transition-all duration-300"
-                      onClick={() => alert("Mock: Withdraw max")}
-                    >
-                      <ArrowDownToLine className="w-4 h-4 mr-2" />
-                      Withdraw Max
-                    </button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <EmployeeStreamCard key={stream.id} stream={stream} />
           ))}
         </div>
 

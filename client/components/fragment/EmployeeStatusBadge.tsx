@@ -1,16 +1,28 @@
-export function EmployeeStatusBadge({ status }: { status: string }) {
-  const styles: Record<string, { bg: string; text: string; dot: boolean }> = {
-    Active: {
+import { statusNumToString } from "@/lib/status";
+
+export function EmployeeStatusBadge({ status }: { status: number }) {
+  const styles: Record<number, { bg: string; text: string; dot: boolean }> = {
+    0: {
       bg: "bg-gradient-to-r from-green-500 to-emerald-500",
       text: "text-white",
       dot: true,
     },
-    Paused: {
+    1: {
+      bg: "bg-gradient-to-r from-green-500 to-emerald-500",
+      text: "text-white",
+      dot: true,
+    },
+    2: {
       bg: "bg-yellow-400 ",
       text: "text-white",
       dot: false,
     },
-    Voided: {
+    3: {
+      bg: "bg-yellow-400 ",
+      text: "text-white",
+      dot: false,
+    },
+    4: {
       bg: "bg-gray-400 ",
       text: "text-white",
       dot: false,
@@ -30,7 +42,7 @@ export function EmployeeStatusBadge({ status }: { status: string }) {
       {style.dot && (
         <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
       )}
-      {status}
+      {statusNumToString(status)}
     </div>
   );
 }

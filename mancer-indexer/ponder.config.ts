@@ -13,7 +13,7 @@ export default createConfig({
       chain: "eduChainTestnet",
       abi: MancerFlowAbi,
       address: "0x0fe44adB7854Cad8F11521e6D7C5eb5B7118EC0b",
-      startBlock: 1234567,
+      startBlock: 33864686,
     },
   },
 });
