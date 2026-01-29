@@ -11,9 +11,7 @@ export default function EmployerStreamsPage() {
   const router = useRouter();
   const { address, isConnecting } = useAccount();
 
-  const { data, loading, error } = useListSenderStreams(
-    address as `0x${string}`,
-  );
+  const { data, loading, error } = useListSenderStreams(address as string);
 
   const streams = data?.streams?.items ?? [];
 

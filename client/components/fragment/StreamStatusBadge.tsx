@@ -1,6 +1,4 @@
 export function StreamStatusBadge({ status }: { status: number }) {
-  console.log(status);
-
   if (status === 0 || status === 1) {
     return (
       <div className="px-4 py-2 rounded-xl bg-green-500 text-white font-semibold flex items-center gap-2">

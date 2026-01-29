@@ -60,7 +60,11 @@ export function StreamRow({ stream }: Props) {
                 {dataLoading ? (
                   <div>Loading...</div>
                 ) : (
-                  <span>{formatUnits(BigInt(data.ratePerSecond), 18)}</span>
+                  <span>
+                    {Number(
+                      formatUnits(BigInt(data.ratePerSecond), 18),
+                    ).toFixed(8)}
+                  </span>
                 )}{" "}
               </div>
             </div>
@@ -74,7 +78,9 @@ export function StreamRow({ stream }: Props) {
                 {dataLoading ? (
                   <div>Loading...</div>
                 ) : (
-                  <span>{formatUnits(BigInt(data.balance), 18)}</span>
+                  <span>
+                    {Number(formatUnits(BigInt(data.balance), 18)).toFixed(8)}
+                  </span>
                 )}
               </div>
             </div>

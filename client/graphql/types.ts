@@ -39,3 +39,28 @@ export type LastWithdrawalQueryResult = {
     }[];
   };
 };
+
+export type StreamEventItem = {
+  id: string;
+  streamId: string;
+  type: string;
+  amount: number | null;
+  oldRate: number | null;
+  newRate: number | null;
+  caller: string;
+  txHash: string;
+  timestamp: number;
+};
+
+export type PageInfo = {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
+export type ActivityStreamQueryResult = {
+  streamEvents: {
+    items: StreamEventItem[];
+    pageInfo: PageInfo;
+    totalCount: number;
+  } | null;
+};

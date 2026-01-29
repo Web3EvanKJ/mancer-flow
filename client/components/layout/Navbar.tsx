@@ -1,7 +1,7 @@
 "use client";
 
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/navigation";
+import { CustomConnect } from "../fragment/CustomConnect";
 
 export function Navbar() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <ConnectButton />
+          <CustomConnect />
         </div>
       </div>
     </header>

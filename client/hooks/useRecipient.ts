@@ -4,21 +4,19 @@ import { useReadContract } from "wagmi";
 import MancerFlowAbi from "@/abis/MancerFlow.json";
 import { MANCER_FLOW_ADDRESS } from "@/config/contract";
 
-export function useWithdrawable(streamId?: bigint) {
+export function useRecipient(streamId?: bigint) {
   const { data, isLoading, error } = useReadContract({
     address: MANCER_FLOW_ADDRESS,
     abi: MancerFlowAbi,
-    functionName: "withdrawableAmountOf",
+    functionName: "getRecipient",
     args: streamId ? [streamId] : undefined,
     query: {
       enabled: Boolean(streamId),
-      refetchInterval: 150_000, // every 150s or 2.5 minutes because of the rpc limit
-      refetchIntervalInBackground: true,
     },
   });
 
   return {
-    withdrawable: data as bigint | undefined,
+    recipient: data as string | undefined,
     isLoading,
     error,
   };

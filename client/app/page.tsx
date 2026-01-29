@@ -1,8 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Navbar } from "@/components/layout/Navbar";
 import { HeroSection } from "@/components/layout/HeroSection";
 import { FeaturesSection } from "@/components/layout/FeaturesSection";
 import { HowItWorksSection } from "@/components/layout/HowItWorksSection";

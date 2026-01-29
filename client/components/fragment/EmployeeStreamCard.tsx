@@ -34,7 +34,7 @@ export function EmployeeStreamCard({
   );
 
   const { data: lastPaid, loading: lastPaidLoading } = useLastWithdrawal(
-    stream.id,
+    String(stream.id),
   );
 
   console.log(lastPaid);
@@ -46,7 +46,8 @@ export function EmployeeStreamCard({
     lastPaidLoading ||
     !streamData ||
     status === undefined ||
-    withdrawable === undefined
+    withdrawable === undefined ||
+    lastPaid === undefined
   ) {
     return (
       <Card className="rounded-3xl p-8">
@@ -89,15 +90,15 @@ export function EmployeeStreamCard({
             />
             <EmployeeStat
               label="Withdrawable"
-              value={`${Number(formatUnits(withdrawable!, 18)).toFixed(4)} PHII`}
+              value={`${Number(formatUnits(withdrawable!, 18)).toFixed(8)} PHII`}
               highlight
               icon={<Wallet className="w-4 h-4" />}
             />
             <EmployeeStat
               label="Last Paid"
               value={
-                lastPaid
-                  ? timeAgo(lastPaid.streamEvents.items[0].timestamp)
+                lastPaid.streamEvents.items[0]?.timestamp
+                  ? timeAgo(lastPaid.streamEvents.items[0]?.timestamp)
                   : "-"
               }
               icon={<Clock className="w-4 h-4" />}
@@ -111,7 +112,7 @@ export function EmployeeStreamCard({
                 setWithdrawMode("custom");
                 setIsWithdrawOpen(true);
               }}
-              className="flex items-center h-12 px-6 rounded-xl border-2 border-[#F9140D] bg-white hover:bg-red-50 text-[#F9140D] font-semibold transition-all duration-300 shadow-sm hover:shadow-lg"
+              className="flex items-center h-12 px-6 rounded-xl border-2 border-[#F9140D] bg-white hover:bg-red-50 text-[#F9140D] font-semibold transition-all duration-300 shadow-sm hover:shadow-lg "
             >
               <ArrowDownToLine className="w-4 h-4 mr-2" />
               Withdraw
@@ -122,7 +123,7 @@ export function EmployeeStreamCard({
                 setWithdrawMode("max");
                 setIsWithdrawOpen(true);
               }}
-              className="flex items-center h-12 px-6 rounded-xl bg-gradient-to-r from-[#F9140D] to-red-600 text-white font-bold shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50 transition-all duration-300"
+              className="flex items-center h-12 px-6 rounded-xl bg-gradient-to-r from-[#F9140D] to-red-600 text-white font-bold shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50 transition-all duration-300 "
             >
               <ArrowDownToLine className="w-4 h-4 mr-2" />
               Withdraw Max

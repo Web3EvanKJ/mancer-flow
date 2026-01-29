@@ -1,6 +1,6 @@
 import { useWithdraw } from "@/hooks/useWithdraw";
 import { useWithdrawMax } from "@/hooks/useWithdrawMax";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useAccount } from "wagmi";
 
@@ -17,36 +17,62 @@ export function WithdrawModal({
   mode: "custom" | "max";
   streamId: bigint;
 }) {
+  useEffect(() => {
+    if (mode === "max") {
+      setAmount(maxAmount);
+    } else {
+      setAmount("");
+    }
+  }, [mode, maxAmount]);
+
   const [amount, setAmount] = useState(mode === "max" ? maxAmount : "");
+  const hasShownSuccess = useRef(false);
 
   const { address } = useAccount();
   const {
     withdraw,
-    isPending,
-    confirming,
+    isPending: withdrawPending,
+    confirming: withdrawConfirming,
     error: withdrawError,
-    isSuccess,
+    isSuccess: withdrawSuccess,
   } = useWithdraw();
-  const { withdrawMax, error: withdrawMaxError } = useWithdrawMax();
+  const {
+    withdrawMax,
+    isPending: withdrawMaxPending,
+    confirming: withdrawMaxConfirming,
+    error: withdrawMaxError,
+    isSuccess: withdrawMaxSuccess,
+  } = useWithdrawMax();
+
+  const isPending = withdrawPending || withdrawMaxPending;
+  const isConfirming = withdrawConfirming || withdrawMaxConfirming;
+  const isSuccess = withdrawSuccess || withdrawMaxSuccess;
+  const error = withdrawError || withdrawMaxError;
 
   useEffect(() => {
     const err = withdrawError || withdrawMaxError;
     if (!err) return;
 
-    console.log(err.name);
-
     // @ts-ignore
     const message = err?.shortMessage || "Transaction failed";
 
     toast.error(message);
-  }, [withdrawError, withdrawMaxError]);
+  }, [error]);
 
   useEffect(() => {
-    if (isSuccess) {
-      toast.success("Withdrawal successful");
-      onClose();
+    if (open) {
+      hasShownSuccess.current = false;
     }
-  }, [isSuccess]);
+  }, [open]);
+
+  useEffect(() => {
+    if (!isSuccess || hasShownSuccess.current) return;
+
+    hasShownSuccess.current = true;
+
+    toast.success("Withdrawal successful");
+    onClose();
+  }, [isSuccess, onClose]);
 
   if (!open) return null;
   return (
@@ -75,9 +101,10 @@ export function WithdrawModal({
             <input
               type="number"
               value={amount}
+              disabled={mode === "max"}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.0"
-              className="w-full px-4 py-3 outline-none rounded-xl"
+              className="w-full px-4 py-3 outline-none rounded-xl disabled:opacity-50 disabled:cursor-no-drop"
             />
             <span className="pr-4 text-sm font-semibold text-gray-500">
               PHII
@@ -95,7 +122,7 @@ export function WithdrawModal({
           </button>
 
           <button
-            disabled={isPending || confirming}
+            disabled={isPending || isConfirming}
             className="flex-1 h-12 rounded-xl bg-gradient-to-r from-[#F9140D] to-red-600 text-white font-bold shadow-lg disabled:opacity-50"
             onClick={() => {
               if (!address) return;
@@ -109,7 +136,7 @@ export function WithdrawModal({
           >
             {isPending
               ? "Loading..."
-              : confirming
+              : isConfirming
                 ? "Confirming..."
                 : "Confirm Withdraw"}
           </button>

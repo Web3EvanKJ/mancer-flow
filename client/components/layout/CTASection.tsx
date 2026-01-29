@@ -1,10 +1,18 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useAccount } from "wagmi";
 
 export function CTASection() {
   const router = useRouter();
+  const { isConnected } = useAccount();
+  const [triedClick, setTriedClick] = useState(false);
 
   function launchApp() {
+    if (!isConnected) {
+      setTriedClick(true);
+      return;
+    }
     router.push("/role");
   }
 
@@ -27,6 +35,11 @@ export function CTASection() {
           >
             Enter App
           </button>
+          {triedClick && !isConnected && (
+            <p className="text-sm text-red-500 font-medium">
+              Please connect your wallet using the button on the top right.
+            </p>
+          )}
         </div>
       </div>
     </section>

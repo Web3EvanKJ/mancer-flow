@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { config } from "@/config";
 import { apolloClient } from "@/apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
+import { WalletGuard } from "@/components/providers/WalletGuard";
 
 const queryClient = new QueryClient();
 
@@ -14,7 +15,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <ApolloProvider client={apolloClient}>
-          <RainbowKitProvider>{children}</RainbowKitProvider>
+          <RainbowKitProvider>
+            <WalletGuard>{children}</WalletGuard>
+          </RainbowKitProvider>
         </ApolloProvider>
       </QueryClientProvider>
     </WagmiProvider>
