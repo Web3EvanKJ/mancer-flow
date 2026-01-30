@@ -1,25 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { Briefcase, Wallet, ArrowRight } from "lucide-react";
 import { RoleOption } from "@/components/fragment/RoleOption";
+import { useAccount } from "wagmi";
+import { createUser, getUser, UserRole } from "@/utils/userApi";
 
 export default function Role() {
   const router = useRouter();
+  const { address, isConnected } = useAccount();
 
   const [name, setName] = useState("");
   const [role, setRole] = useState<"employer" | "employee" | null>(null);
+  const [checkingUser, setCheckingUser] = useState(true);
 
-  function continueFlow() {
-    if (!name || !role) return;
+  useEffect(() => {
+    if (!isConnected || !address) return;
 
-    // Redirect based on role
+    async function checkUser() {
+      try {
+        const user = await getUser(address as string);
+
+        if (user?.role === "EMPLOYER") {
+          router.replace("/employer/streams");
+        } else if (user?.role === "EMPLOYEE") {
+          router.replace("/me");
+        } else {
+          setCheckingUser(false);
+        }
+      } catch (err) {
+        // user not found → stay
+        setCheckingUser(false);
+      }
+    }
+
+    checkUser();
+  }, [address, isConnected, router]);
+
+  async function continueFlow() {
+    if (!address || !role) return;
+
+    const backendRole: UserRole = role === "employer" ? "EMPLOYER" : "EMPLOYEE";
+
+    await createUser(address, backendRole);
+
     router.push(role === "employer" ? "/employer/streams" : "/me");
   }
+
+  if (checkingUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Checking account...
+      </div>
+    );
+  }
+
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-black/60 via-red-950/40 to-black/60 backdrop-blur-md"
