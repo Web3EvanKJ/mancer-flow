@@ -18,6 +18,7 @@ import { StreamActionsSection } from "@/components/layout/StreamActionsSection";
 import { StreamStatsSection } from "@/components/layout/StreamStatsSection";
 import { StreamActivitySection } from "@/components/layout/StreamActivitySection";
 import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
 
 export default function EmployerStreamDetailPage() {
   const params = useParams();
@@ -37,7 +38,7 @@ export default function EmployerStreamDetailPage() {
     useStreamActions();
 
   const { data: activityStream, loading: activityLoading } = useActivityStream(
-    String(streamId),
+    Number(streamId),
     PAGE_SIZE,
     offset,
   );
@@ -105,6 +106,9 @@ export default function EmployerStreamDetailPage() {
     disabled = Number(status) === 4;
   }
 
+  const refundableFormatted = Number(formatUnits(refundable!, 18));
+  const isZeroRefundable = refundableFormatted <= 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-red-50/20 to-white">
       <div className="mx-auto max-w-6xl px-6 py-10 space-y-8">
@@ -141,6 +145,8 @@ export default function EmployerStreamDetailPage() {
           pauseStream={pauseStream}
           refundMaxStream={refundMaxStream}
           voidStream={voidStream}
+          isZeroRefundable={isZeroRefundable}
+          status={status}
         />
 
         <StreamActivitySection

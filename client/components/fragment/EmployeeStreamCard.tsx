@@ -34,10 +34,8 @@ export function EmployeeStreamCard({
   );
 
   const { data: lastPaid, loading: lastPaidLoading } = useLastWithdrawal(
-    String(stream.id),
+    Number(stream.id),
   );
-
-  console.log(lastPaid);
 
   if (
     dataLoading ||
@@ -55,6 +53,9 @@ export function EmployeeStreamCard({
       </Card>
     );
   }
+
+  const withdrawableFormatted = Number(formatUnits(withdrawable, 18));
+  const isZeroWithdrawable = withdrawableFormatted <= 0;
 
   return (
     <Card className="group bg-white border-2 border-gray-100 hover:border-[#F9140D]/30 rounded-3xl shadow-lg hover:shadow-2xl hover:shadow-red-500/10 transition-all duration-300">
@@ -90,7 +91,7 @@ export function EmployeeStreamCard({
             />
             <EmployeeStat
               label="Withdrawable"
-              value={`${Number(formatUnits(withdrawable!, 18)).toFixed(8)} PHII`}
+              value={`${Number(formatUnits(withdrawable!, 18)).toFixed(3)} PHII`}
               highlight
               icon={<Wallet className="w-4 h-4" />}
             />
@@ -112,7 +113,8 @@ export function EmployeeStreamCard({
                 setWithdrawMode("custom");
                 setIsWithdrawOpen(true);
               }}
-              className="flex items-center h-12 px-6 rounded-xl border-2 border-[#F9140D] bg-white hover:bg-red-50 text-[#F9140D] font-semibold transition-all duration-300 shadow-sm hover:shadow-lg "
+              disabled={isZeroWithdrawable}
+              className="flex items-center h-12 px-6 rounded-xl border-2 border-[#F9140D] bg-white hover:bg-red-50 text-[#F9140D] font-semibold transition-all duration-300 shadow-sm hover:shadow-lg disabled:opacity-50"
             >
               <ArrowDownToLine className="w-4 h-4 mr-2" />
               Withdraw
@@ -123,7 +125,8 @@ export function EmployeeStreamCard({
                 setWithdrawMode("max");
                 setIsWithdrawOpen(true);
               }}
-              className="flex items-center h-12 px-6 rounded-xl bg-gradient-to-r from-[#F9140D] to-red-600 text-white font-bold shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50 transition-all duration-300 "
+              disabled={isZeroWithdrawable}
+              className="flex items-center h-12 px-6 rounded-xl bg-gradient-to-r from-[#F9140D] to-red-600 text-white font-bold shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50 transition-all duration-300 disabled:opacity-50"
             >
               <ArrowDownToLine className="w-4 h-4 mr-2" />
               Withdraw Max

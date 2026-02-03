@@ -14,7 +14,7 @@ ponder.on("MancerFlow:CreateFlowStream", async ({ event, context }) => {
     event.args;
 
   await context.db.insert(stream).values({
-    id: streamId.toString(),
+    id: streamId,
     sender,
     recipient,
     token,
@@ -29,7 +29,7 @@ ponder.on("MancerFlow:CreateFlowStream", async ({ event, context }) => {
 
   await context.db.insert(streamEvent).values({
     id: `${event.transaction.hash}-create`,
-    streamId: streamId.toString(),
+    streamId: streamId,
     type: "CREATE",
     caller: event.transaction.from,
     txHash: event.transaction.hash,
@@ -43,14 +43,14 @@ ponder.on("MancerFlow:CreateFlowStream", async ({ event, context }) => {
 ponder.on("MancerFlow:DepositFlowStream", async ({ event, context }) => {
   const { streamId, amount } = event.args;
 
-  await context.db.update(stream, { id: streamId.toString() }).set((row) => ({
+  await context.db.update(stream, { id: streamId }).set((row) => ({
     balance: row.balance + amount,
     updatedAt: now(event.block),
   }));
 
   await context.db.insert(streamEvent).values({
     id: `${event.transaction.hash}-deposit`,
-    streamId: streamId.toString(),
+    streamId: streamId,
     type: "DEPOSIT",
     amount,
     caller: event.transaction.from,
@@ -65,14 +65,14 @@ ponder.on("MancerFlow:DepositFlowStream", async ({ event, context }) => {
 ponder.on("MancerFlow:AdjustFlowStream", async ({ event, context }) => {
   const { streamId, oldRatePerSecond, newRatePerSecond } = event.args;
 
-  await context.db.update(stream, { id: streamId.toString() }).set({
+  await context.db.update(stream, { id: streamId }).set({
     ratePerSecond: newRatePerSecond,
     updatedAt: now(event.block),
   });
 
   await context.db.insert(streamEvent).values({
     id: `${event.transaction.hash}-adjust`,
-    streamId: streamId.toString(),
+    streamId: streamId,
     type: "ADJUST_RATE",
     oldRate: oldRatePerSecond,
     newRate: newRatePerSecond,
@@ -89,12 +89,12 @@ ponder.on("MancerFlow:PauseFlowStream", async ({ event, context }) => {
   const { streamId } = event.args;
 
   await context.db
-    .update(stream, { id: streamId.toString() })
+    .update(stream, { id: streamId })
     .set({ status: "PAUSED", updatedAt: now(event.block) });
 
   await context.db.insert(streamEvent).values({
     id: `${event.transaction.hash}-pause`,
-    streamId: streamId.toString(),
+    streamId: streamId,
     type: "PAUSE",
     caller: event.transaction.from,
     txHash: event.transaction.hash,
@@ -105,7 +105,7 @@ ponder.on("MancerFlow:PauseFlowStream", async ({ event, context }) => {
 ponder.on("MancerFlow:RestartFlowStream", async ({ event, context }) => {
   const { streamId, ratePerSecond } = event.args;
 
-  await context.db.update(stream, { id: streamId.toString() }).set({
+  await context.db.update(stream, { id: streamId }).set({
     ratePerSecond: ratePerSecond,
     status: "STREAMING",
     updatedAt: now(event.block),
@@ -113,7 +113,7 @@ ponder.on("MancerFlow:RestartFlowStream", async ({ event, context }) => {
 
   await context.db.insert(streamEvent).values({
     id: `${event.transaction.hash}-restart`,
-    streamId: streamId.toString(),
+    streamId: streamId,
     type: "RESTART",
     newRate: ratePerSecond,
     caller: event.transaction.from,
@@ -128,14 +128,14 @@ ponder.on("MancerFlow:RestartFlowStream", async ({ event, context }) => {
 ponder.on("MancerFlow:WithdrawFromFlowStream", async ({ event, context }) => {
   const { streamId, withdrawAmount } = event.args;
 
-  await context.db.update(stream, { id: streamId.toString() }).set((row) => ({
+  await context.db.update(stream, { id: streamId }).set((row) => ({
     balance: row.balance - withdrawAmount,
     updatedAt: now(event.block),
   }));
 
   await context.db.insert(streamEvent).values({
     id: `${event.transaction.hash}-withdraw`,
-    streamId: streamId.toString(),
+    streamId: streamId,
     type: "WITHDRAW",
     amount: withdrawAmount,
     caller: event.transaction.from,
@@ -147,14 +147,14 @@ ponder.on("MancerFlow:WithdrawFromFlowStream", async ({ event, context }) => {
 ponder.on("MancerFlow:RefundFromFlowStream", async ({ event, context }) => {
   const { streamId, amount } = event.args;
 
-  await context.db.update(stream, { id: streamId.toString() }).set((row) => ({
+  await context.db.update(stream, { id: streamId }).set((row) => ({
     balance: row.balance - amount,
     updatedAt: now(event.block),
   }));
 
   await context.db.insert(streamEvent).values({
     id: `${event.transaction.hash}-refund`,
-    streamId: streamId.toString(),
+    streamId: streamId,
     type: "REFUND",
     amount,
     caller: event.transaction.from,
@@ -170,15 +170,41 @@ ponder.on("MancerFlow:VoidFlowStream", async ({ event, context }) => {
   const { streamId } = event.args;
 
   await context.db
-    .update(stream, { id: streamId.toString() })
+    .update(stream, { id: streamId })
     .set({ status: "VOIDED", updatedAt: now(event.block) });
 
   await context.db.insert(streamEvent).values({
     id: `${event.transaction.hash}-void`,
-    streamId: streamId.toString(),
+    streamId: streamId,
     type: "VOID",
     caller: event.transaction.from,
     txHash: event.transaction.hash,
     timestamp: now(event.block),
   });
+});
+
+/* ---------------------------------------------
+   TRANSFER
+----------------------------------------------*/
+
+ponder.on("MancerFlow:Transfer", async ({ event, context }) => {
+  const { from, to, tokenId: streamId } = event.args;
+
+  // Skip mint events
+  if (from === "0x0000000000000000000000000000000000000000") {
+    return;
+  }
+
+  // Only update if stream exists (in case Transfer is processed before CreateFlowStream)
+  const existingStream = await context.db
+    .find(stream, { id: streamId })
+    .catch(() => null);
+
+  if (!existingStream) {
+    return;
+  }
+
+  await context.db
+    .update(stream, { id: streamId })
+    .set({ recipient: to, updatedAt: now(event.block) });
 });

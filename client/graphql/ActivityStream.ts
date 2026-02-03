@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export const GET_ACTIVITY_STREAM = gql`
   query GetStreamEventsByStreamId(
-    $streamId: String!
+    $streamId: BigInt!
     $limit: Int!
     $offset: Int!
   ) {

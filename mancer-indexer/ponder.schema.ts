@@ -1,7 +1,7 @@
 import { onchainTable } from "ponder";
 
 export const stream = onchainTable("stream", (t) => ({
-  id: t.text().primaryKey(),
+  id: t.bigint().primaryKey(),
   sender: t.hex().notNull(),
   recipient: t.hex().notNull(),
   token: t.hex().notNull(),
@@ -16,7 +16,7 @@ export const stream = onchainTable("stream", (t) => ({
 
 export const streamEvent = onchainTable("stream_event", (t) => ({
   id: t.text().primaryKey(),
-  streamId: t.text().notNull(),
+  streamId: t.bigint().notNull(),
   type: t.text().notNull(),
   amount: t.bigint(), // nullable
   oldRate: t.bigint(), // nullable

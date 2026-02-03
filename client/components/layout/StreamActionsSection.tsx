@@ -20,6 +20,8 @@ export function StreamActionsSection({
   pauseStream,
   refundMaxStream,
   voidStream,
+  isZeroRefundable,
+  status,
 }: any) {
   return (
     <Card className="bg-white border-2 border-gray-100 rounded-3xl shadow-xl shadow-red-500/5">
@@ -42,13 +44,13 @@ export function StreamActionsSection({
             label="Pause"
             icon={<Pause className="w-4 h-4" />}
             onClick={() => pauseStream(streamId)}
-            isPending={isPending || disabled}
+            isPending={isPending || disabled || status === 2 || status === 3}
           />
           <StreamAction
-            label="Restart"
+            label="Restart/Resume"
             icon={<Play className="w-4 h-4" />}
             onClick={() => setAction("restart")}
-            isPending={disabled}
+            isPending={disabled || status === 0 || status === 1}
           />
           <StreamAction
             label="Adjust Rate"
@@ -60,13 +62,14 @@ export function StreamActionsSection({
             label="Refund"
             icon={<RotateCcw className="w-4 h-4" />}
             onClick={() => setAction("refund")}
+            isPending={isPending || isZeroRefundable}
           />
           <StreamAction
             label="Refund Max"
             destructive
             icon={<ArrowDownToLine className="w-4 h-4" />}
             onClick={() => refundMaxStream(streamId)}
-            isPending={isPending}
+            isPending={isPending || isZeroRefundable}
           />
           <StreamAction
             label="Void Stream"

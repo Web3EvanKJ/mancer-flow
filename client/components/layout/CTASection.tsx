@@ -36,7 +36,7 @@ export function CTASection() {
             Enter App
           </button>
           {triedClick && !isConnected && (
-            <p className="text-sm text-red-500 font-medium">
+            <p className="mt-3 text-sm text-red-500 font-medium">
               Please connect your wallet using the button on the top right.
             </p>
           )}

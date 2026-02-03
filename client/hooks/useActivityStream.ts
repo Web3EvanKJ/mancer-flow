@@ -3,7 +3,7 @@ import { ActivityStreamQueryResult } from "@/graphql/types";
 import { GET_ACTIVITY_STREAM } from "@/graphql/ActivityStream";
 
 export function useActivityStream(
-  streamId: string,
+  streamId: number,
   limit: number,
   offset: number,
 ) {

@@ -7,8 +7,15 @@ import { UserRole } from "../generated/prisma/enums";
 dotenv.config();
 
 const app = express();
+const allowedOrigins = process.env.CLIENT_URL;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 4000;

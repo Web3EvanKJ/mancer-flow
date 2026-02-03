@@ -1,3 +1,4 @@
+import { useProtocolFee } from "@/hooks/useProtocolFee";
 import { useWithdraw } from "@/hooks/useWithdraw";
 import { useWithdrawMax } from "@/hooks/useWithdrawMax";
 import { useEffect, useRef, useState } from "react";
@@ -43,6 +44,23 @@ export function WithdrawModal({
     error: withdrawMaxError,
     isSuccess: withdrawMaxSuccess,
   } = useWithdrawMax();
+  const { protocolFee, isLoading: protocolFeeLoading } = useProtocolFee(
+    "0xc6800342F5C0895dd4419b99Bf758b2136F1CAfe",
+  );
+
+  const feePercent = protocolFee ? Number(protocolFee) : 0;
+
+  const numericAmount = Number(amount || 0);
+
+  const feeAmount =
+    protocolFeeLoading || !numericAmount
+      ? null
+      : (numericAmount * feePercent) / 100;
+
+  const receiveAmount =
+    protocolFeeLoading || !numericAmount
+      ? null
+      : numericAmount - (feeAmount || 0);
 
   const isPending = withdrawPending || withdrawMaxPending;
   const isConfirming = withdrawConfirming || withdrawMaxConfirming;
@@ -89,10 +107,35 @@ export function WithdrawModal({
           Withdraw PHII
         </h2>
 
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-gray-500">
           Available:{" "}
           <span className="font-semibold text-black">{maxAmount} PHII</span>
         </p>
+
+        {/* protocol fee display */}
+        <div className="mb-2 space-y-1 text-sm">
+          {protocolFeeLoading ? (
+            <p className="text-gray-400 animate-pulse">
+              Loading protocol fee...
+            </p>
+          ) : (
+            <>
+              <p className="text-gray-500 mb-0">
+                Protocol fee:{" "}
+                <span className="font-semibold text-black">{feePercent}%</span>
+              </p>
+
+              <p className="text-gray-500">
+                You receive:{" "}
+                {amount && Number(amount) > 0 && (
+                  <span className="font-semibold text-green-600">
+                    {receiveAmount?.toFixed(4)} PHII
+                  </span>
+                )}
+              </p>
+            </>
+          )}
+        </div>
 
         {/* input */}
         <div className="mb-6">
