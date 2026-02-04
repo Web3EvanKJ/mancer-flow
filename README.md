@@ -22,7 +22,7 @@ mancer-flow/
 Make sure you have installed:
 
 - **Node.js ≥ 18**
-- **PostgreSQL**
+- **PostgreSQL** (Railway Preferred)
 - **npm / pnpm / yarn**
 - WalletConnect Project ID
 - EDU Chain RPC URL (Alchemy recommended)
@@ -80,7 +80,7 @@ npm install
 Create `server/.env`:
 
 ```env
-DATABASE_URL=your_deployed_database_url
+DATABASE_URL=your_deployed_database_url_railway
 PORT=4000
 CLIENT_URL=http://localhost:3000
 ```
